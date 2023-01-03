@@ -1,0 +1,11 @@
+{
+  "versionReporting": false,
+  "app": "python cdk.py",
+  "context": {
+    "aws-cdk:enableDiffNoFail": "true",
+    "@aws-cdk/core:stackRelativeExports": "true",
+    "@aws-cdk/aws-efs:defaultEncryptionAtRest": true,
+    "@aws-cdk/aws-lambda:recognizeVersionProps": true,
+    "@aws-cdk/aws-cloudfront:defaultSecurityPolicyTLSv1.2_2021": true
+  }
+}

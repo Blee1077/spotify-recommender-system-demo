@@ -1,0 +1,7 @@
+gradio
+spotipy
+umap-learn
+pandas
+numpy
+plotly
+scikit-learn
