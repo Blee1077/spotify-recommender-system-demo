@@ -292,7 +292,7 @@ with gr.Blocks(analytics_enabled=False) as demo:
             name_box = gr.Textbox(label="Track Name", interactive=True)
             artist_box = gr.Textbox(label="Track Artist", interactive=True)
             lang_box = gr.Radio(choices=["English", "Japanese", "Korean", "Cantonese", "Other"], value="English", label="Language", interactive=True)
-            plot_box = gr.Radio(choices=["Yes", "No"], value="No", label="Include output plot of most tracks?", interactive=True)
+            plot_box = gr.Radio(choices=["Yes", "No"], value="No", label="Include output plot of similar tracks?", interactive=True)
             submit_btn = gr.Button("Submit")
             
         # Output column of table
@@ -318,6 +318,7 @@ with gr.Blocks(analytics_enabled=False) as demo:
             ["Glimpse of Us", "Joji", "English", "Yes"],
             ["You outside my window", "きのこ帝国", "Japanese", "Yes"],
             ["INDUSTRY BABY", "Lil Nas X", "English", "No"],
+            ["Butterfly", "BTS", "Korean", "Yes"],
         ],
         inputs=[name_box, artist_box, lang_box, plot_box],
         outputs=[chosen_track_box, output_box, map],
