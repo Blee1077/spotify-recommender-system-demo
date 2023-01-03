@@ -272,10 +272,16 @@ with gr.Blocks(analytics_enabled=False) as demo:
         """
         # Spotify Recommender System Demo
         Provide a track name and its corresponding track artist and you'll receive 5 of the closest tracks from my Spotify library.
-        For more context on this demo and how it was created, head over to the [blog article](https://solverism.com/posts/2022-10-21-spotify.html).  
-        You can specify just a track name or just an artist. In the former case, the first result from Spotify's search algorithm will be used. 
+        For more information on how this was created, head over to [Philipp Schmid's blog article](https://www.philschmid.de/serverless-gradio).  
+        You can specify just a track name or just an artist. In the former case, the first result from Spotify's search algorithm will be used.
         In the latter case, the artists' most popular track will be used.  
-        Tip: double click on the plot to zoom out and view all clusters.
+        Click on the examples at the bottom to get a quick start.  
+        
+        This demo is part of my blog series on leveraging Spotify audio features to create a simple recommender system using the K-nearest neighbour algorithm and deploying it using the severless computing paradigm.  
+        Check out part 1 which covers the [exploratory data analysis here](https://solverism.com/posts/2022-10-21-spotify.html) and part 2 which covers creating this app (coming soon).
+        
+        Note: initial runs with and without the plot will take longer than subsequent runs, be prepared to wait for up to a minute for first time runs.  
+        Tip: double click on the plot to zoom out and view all clusters.  
         """
     )
     
@@ -286,7 +292,7 @@ with gr.Blocks(analytics_enabled=False) as demo:
             name_box = gr.Textbox(label="Track Name", interactive=True)
             artist_box = gr.Textbox(label="Track Artist", interactive=True)
             lang_box = gr.Radio(choices=["English", "Japanese", "Korean", "Cantonese", "Other"], value="English", label="Language", interactive=True)
-            plot_box = gr.Radio(choices=["Yes", "No"], value="No", label="Include output plot of most similar tracks?", interactive=True)
+            plot_box = gr.Radio(choices=["Yes", "No"], value="No", label="Include output plot of most tracks?", interactive=True)
             submit_btn = gr.Button("Submit")
             
         # Output column of table
@@ -298,10 +304,25 @@ with gr.Blocks(analytics_enabled=False) as demo:
     with gr.Row():
         map = gr.Plot(visible=False)
     
+    # Submission button
     submit_btn.click(
         predict,
         [name_box, artist_box, lang_box, plot_box],
         [chosen_track_box, output_box, map],
+    )
+    
+    # Examples for users to get started with
+    gr.Examples(
+        examples=[
+            ["Call Me", "NAV", "English", "No"],
+            ["Glimpse of Us", "Joji", "English", "Yes"],
+            ["You outside my window", "きのこ帝国", "Japanese", "Yes"],
+            ["INDUSTRY BABY", "Lil Nas X", "English", "No"],
+        ],
+        inputs=[name_box, artist_box, lang_box, plot_box],
+        outputs=[chosen_track_box, output_box, map],
+        fn=predict,
+        cache_examples=False
     )
 
 demo.launch(server_port=int(os.getenv('PORT')), enable_queue=False)
