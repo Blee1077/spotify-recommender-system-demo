@@ -1,10 +1,10 @@
 import os
 import pickle
-import spotipy
 import gradio as gr
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from spotipy import CacheFileHandler, MemoryCacheHandler, Spotify
 from spotipy.oauth2 import SpotifyOAuth
 
 MODEL_PATH = r"./model"
@@ -57,13 +57,13 @@ def query(name: str, artist: str):
     
     Returns:
         feats (dict): Spotify audio features of the track 
-        track_artist (str): String of track name and track artist
+        track_artist (list): Strings of track name and track artist
         genres (list): Genres associated with the track's artist
     """
     query_str = f"{name} {artist}"
     res = sp.search(q=query_str, type='track')
     feats = sp.audio_features(res['tracks']['items'][0]['id'])[0]
-    track_artist = f"{res['tracks']['items'][0]['name']} - {res['tracks']['items'][0]['artists'][0]['name']}"
+    track_artist = [res['tracks']['items'][0]['name'], res['tracks']['items'][0]['artists'][0]['name']]
     genres = get_artist_genres(res)
     
     return feats, genres, track_artist
@@ -103,7 +103,7 @@ def create_features(name: str, artist: str, lang_box: str):
         
     Returns:
         (numpy.array): Processed Spotify audio features
-        track_artist (str): String of track name and track artist
+        track_artist (list): Strings of track name and track artist
     """
     feats, proc_genres, track_artist = query(name, artist)
     proc_lang_list = proc_language(lang_box)
@@ -122,23 +122,24 @@ def create_features(name: str, artist: str, lang_box: str):
     return np.array(all_feats).reshape(1, -1), track_artist
 
 
-def plot(output_df: pd.DataFrame, features: np.ndarray, track_artist: str):
+def plot(output_df: pd.DataFrame, features: np.ndarray, track_artist: list):
     """Creates a Plotly 2D UMAP embedding scatter of chosen track, nearest neighbours, and tracks from my library.
     
     Args:
         output_df (pd.DataFrame): DataFrame of most similar tracks to user's chosen track
         features (np.ndarray): Spotify audio features of user's chosen track
-        track_artist (str): String of track name and artist
+        track_artist (list): Strings of track name and track artist
         
     Returns:
         (plotly.graph_objects.Figure): Figure object of plot
     """
     embedded_feat = reducer.transform(features)[0]
-    selected_track, selected_artist = track_artist.split('-')
+    selected_track, selected_artist = track_artist
+    joined_track_artist = ' - '.join(track_artist)
     fig = go.Figure()
     
     idx_mask = ~embedding_df.index.isin(output_df.index)
-    track_mask = embedding_df['name_artist'] != track_artist
+    track_mask = embedding_df['name_artist'] != joined_track_artist
     filt_embedding_df = embedding_df.iloc[idx_mask].loc[track_mask]
     fig.add_trace(
         go.Scattergl(
@@ -185,8 +186,8 @@ def plot(output_df: pd.DataFrame, features: np.ndarray, track_artist: str):
         go.Scattergl(
             x=[embedded_feat[0]],
             y=[embedded_feat[1]],
-            text=[track_artist],
-            customdata=[[[selected_track.strip(),], [selected_artist.strip(),]]],
+            text=[joined_track_artist],
+            customdata=[[[selected_track], [selected_artist]]],
             hovertemplate=
                 "<b>%{text}</b><br><br>" +
                 "Name: %{customdata[0]}<br>" +
@@ -224,11 +225,12 @@ def predict(name: str, artist: str, lang_box: str, plot_box: str):
         plot_box (str): Whether to plot figure of 2D UMAP embedding
 
     Returns:
-        track_artist (str): String of track name and artist
+        track_artist (list): Strings of track name and track artist
         output_df (pd.DataFrame): DataFrame of most similar tracks to user's chosen track
         Update of {map} variable depending on value of {plot_box} given
     """
     features, track_artist = create_features(name, artist, lang_box)
+    joined_track_artist = ' - '.join(track_artist)
     nn_dist, nn_idx = model.kneighbors(features)
     
     output_df = (
@@ -239,25 +241,25 @@ def predict(name: str, artist: str, lang_box: str, plot_box: str):
     )
     output_df = (
         output_df
-        .loc[(output_df['Track Name'] != track_artist.split('-')[0].strip()) &
-            (output_df['Track Artist'] != track_artist.split('-')[1].strip())]
+        .loc[(output_df['Track Name'] != track_artist[0]) &
+            (output_df['Track Artist'] != track_artist[1])]
         .head(5)
         .assign(Rank=list(range(1, 6)))
         [['Rank', 'Track Name', 'Track Artist', 'Distance']]
     )
     
     if plot_box != 'Yes':
-        return track_artist, output_df, gr.update(visible=False)
+        return joined_track_artist, output_df, gr.update(visible=False)
     else:
         fig = plot(output_df, features, track_artist)
-        return track_artist, output_df, gr.update(value=fig, visible=True)
+        return joined_track_artist, output_df, gr.update(value=fig, visible=True)
 
 
 # Authenticate Spotipy instance
 scope = "user-library-read,user-top-read,user-read-recently-played"
-access_token = spotipy.CacheFileHandler(cache_path='.cache').get_cached_token()
-cache_handler = spotipy.MemoryCacheHandler(token_info=access_token)
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'), cache_handler=cache_handler))
+access_token = CacheFileHandler(cache_path='.cache').get_cached_token()
+cache_handler = MemoryCacheHandler(token_info=access_token)
+sp = Spotify(auth_manager=SpotifyOAuth(scope=scope, redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'), cache_handler=cache_handler))
 
 # Load in preproc and model artifacts
 minmax_scaler_tempo = load_pickle(f"{MODEL_PATH}/minmax_scaler_tempo.pkl")
@@ -277,7 +279,7 @@ with gr.Blocks(analytics_enabled=False) as demo:
         In the latter case, the artists' most popular track will be used.  
         Click on the examples at the bottom to get a quick start.  
         
-        This demo is part of my blog series on leveraging Spotify audio features to create a simple recommender system using the K-nearest neighbour algorithm and deploying it using the severless computing paradigm.  
+        This demo is part of my blog series on leveraging Spotify audio features to create a simple recommender system using the K-nearest neighbour algorithm and deploying it using the serverless computing paradigm.  
         Check out part 1 which covers the [exploratory data analysis here](https://solverism.com/posts/2022-10-21-spotify.html) and part 2 which covers creating this app (coming soon).
         
         Note: initial runs with and without the plot will take longer than subsequent runs, be prepared to wait for up to a minute for first time runs.  
