@@ -4,6 +4,9 @@
 ### Linux ###
 *~
 
+# Debugging notebook
+debug.ipynb
+
 # AWS SAM build folder
 .aws-sam
 
