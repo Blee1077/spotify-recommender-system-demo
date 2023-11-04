@@ -1,6 +1,6 @@
 {
   "versionReporting": false,
-  "app": "python cdk.py",
+  "app": "python _cdk.py",
   "context": {
     "aws-cdk:enableDiffNoFail": "true",
     "@aws-cdk/core:stackRelativeExports": "true",

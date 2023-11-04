@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from constructs import Construct
 from aws_cdk import App, Stack, Environment, Duration, CfnOutput
-from aws_cdk import Environment, Stack
 from aws_cdk.aws_lambda import DockerImageFunction, DockerImageCode, FunctionUrlAuthType
 
 # Environment

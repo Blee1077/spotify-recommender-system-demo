@@ -1,0 +1,7 @@
+*.xlsx
+*.png
+*.ipynb
+venv
+.venv
+.git
+cdk.out

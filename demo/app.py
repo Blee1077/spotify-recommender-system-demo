@@ -328,4 +328,4 @@ with gr.Blocks(analytics_enabled=False) as demo:
         cache_examples=False
     )
 
-demo.launch(server_port=int(os.getenv('PORT')), enable_queue=False)
+demo.launch(server_port=int(os.getenv('PORT')))
