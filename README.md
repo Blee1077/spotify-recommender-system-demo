@@ -1,4 +1,4 @@
-https://m4llqgjce7qry2xf3hol5m2at40nqnew.lambda-url.eu-west-2.on.aws/
+https://twapdidvewe5kuzrbb56tubxti0xhlse.lambda-url.eu-west-2.on.aws/
 
 ## To run
 1. Ensure CDK is installed
