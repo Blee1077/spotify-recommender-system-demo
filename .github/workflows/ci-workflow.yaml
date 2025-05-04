@@ -37,3 +37,4 @@ jobs:
       image-tag: ${{ github.event_name == 'workflow_dispatch' && inputs.image-tag || 'latest' }}
       run-trivy-scan: ${{ github.event_name == 'workflow_dispatch' && inputs.run-trivy-scan || false }}
       run-copa-patch: ${{ github.event_name == 'workflow_dispatch' && inputs.run-copa-patch || false }}
+    secrets: inherit
