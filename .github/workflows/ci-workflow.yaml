@@ -1,20 +1,39 @@
-name: Build and Push Docker Image via Shared CI Workflow
+name: Trigger Shared Docker CI
 
 on:
   push:
-    branches: [main]
+    branch: [main]
+
+  workflow_dispatch:
+    inputs:
+      dockerfile-path:
+        required: true
+        default: .
+      image-name:
+        required: true
+        default: my-app
+      image-tag:
+        required: false
+        default: latest
+      run-trivy-scan:
+        type: boolean
+        required: false
+        default: true
+      run-copa-patch:
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   id-token: write
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
-  build:
-    uses: blee1077/github-workflows/.github/workflows/build-and-push-image.yaml@main
+  trigger-build:
+    uses: blee1077/github-workflows/.github/workflows/trigger-build-and-push-image.yaml@main
     with:
-      dockerfile-path: .
-      image-name: test-image
-      image-tag: v0.0.1
-      run-trivy-scan: false
-      run-copa-patch: false
+      dockerfile-path: ${{ github.event_name == 'workflow_dispatch' && inputs.dockerfile-path || '.' }}
+      image-name: ${{ github.event_name == 'workflow_dispatch' && inputs.image-name || 'test-image' }}
+      image-tag: ${{ github.event_name == 'workflow_dispatch' && inputs.image-tag || 'latest' }}
+      run-trivy-scan: ${{ github.event_name == 'workflow_dispatch' && inputs.run-trivy-scan || false }}
+      run-copa-patch: ${{ github.event_name == 'workflow_dispatch' && inputs.run-copa-patch || false }}
