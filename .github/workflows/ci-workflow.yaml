@@ -8,12 +8,15 @@ on:
     inputs:
       dockerfile-path:
         required: true
+        type: string
         default: .
       image-name:
         required: true
+        type: string
         default: my-app
       image-tag:
         required: false
+        type: string
         default: latest
       run-trivy-scan-and-copa-patch:
         type: boolean
