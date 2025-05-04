@@ -15,11 +15,7 @@ on:
       image-tag:
         required: false
         default: latest
-      run-trivy-scan:
-        type: boolean
-        required: false
-        default: true
-      run-copa-patch:
+      run-trivy-scan-and-copa-patch:
         type: boolean
         required: false
         default: false
@@ -35,6 +31,5 @@ jobs:
       dockerfile-path: ${{ github.event_name == 'workflow_dispatch' && inputs.dockerfile-path || '.' }}
       image-name: ${{ github.event_name == 'workflow_dispatch' && inputs.image-name || 'test-image' }}
       image-tag: ${{ github.event_name == 'workflow_dispatch' && inputs.image-tag || 'latest' }}
-      run-trivy-scan: ${{ github.event_name == 'workflow_dispatch' && inputs.run-trivy-scan || false }}
-      run-copa-patch: ${{ github.event_name == 'workflow_dispatch' && inputs.run-copa-patch || false }}
+      run-trivy-scan-and-copa-patch: ${{ github.event_name == 'workflow_dispatch' && inputs.run-trivy-scan-and-copa-patch || false }}
     secrets: inherit
