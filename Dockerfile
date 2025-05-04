@@ -6,9 +6,9 @@ ENV PORT="8080"
 ENV READINESS_CHECK_PROTOCOL="tcp"
 ENV ASYNC_INIT="false"
 
-WORKDIR /var/task
-COPY demo/app.py demo/requirements.txt demo/.cache  ./
-COPY demo/model/  ./model/
-RUN python3 -m pip install -r requirements.txt -t .
+# WORKDIR /var/task
+# COPY demo/app.py demo/requirements.txt demo/.cache  ./
+# COPY demo/model/  ./model/
+# RUN python3 -m pip install -r requirements.txt -t .
 
-CMD ["python3", "app.py"]
+# CMD ["python3", "app.py"]
