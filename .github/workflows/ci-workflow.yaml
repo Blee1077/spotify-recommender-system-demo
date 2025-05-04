@@ -1,0 +1,19 @@
+name: Build and Push Docker Image via Shared CI Workflow
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    uses: blee1077/github-workflows/.github/workflows/build-and-push-image.yaml@main
+    with:
+      dockerfile-path: .
+      image-name: test-image
+      image-tag: v0.0.1
+      run-trivy-scan: false
+      run-copa-patch: false
